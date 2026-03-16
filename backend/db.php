@@ -1,9 +1,9 @@
 <?php
 // db.php
-$host = '127.0.0.1';
-$db = 'publications_nexus_dashboard_db';
-$user = 'root'; // Change if your MySQL user is different
-$pass = '';     // Change if your MySQL password is not empty
+$host = getenv('DB_HOST') ?: '127.0.0.1';
+$db = getenv('DB_NAME') ?: 'publications_nexus_dashboard_db';
+$user = getenv('DB_USER') ?: 'root'; // Change if your MySQL user is different
+$pass = getenv('DB_PASS') ?: '';     // Change if your MySQL password is not empty
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
