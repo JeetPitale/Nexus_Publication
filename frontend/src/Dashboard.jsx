@@ -3,13 +3,15 @@ import axios from 'axios';
 import {
   Building2, Search, Plus, Filter,
   X, LogIn, LogOut, Edit2, Trash2,
-  Database, AlertCircle, Download, GripVertical
+  Database, AlertCircle, Download, GripVertical, ChevronDown
 } from 'lucide-react';
 import FilterComponent from './FilterComponent';
 
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import bcrypt from 'bcryptjs';
 import toast, { Toaster } from 'react-hot-toast';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 
 const ADMIN_HASH = '$2b$10$xiXaAZst3FE.kbbEiWGd2.yWLiLsUpwua6jAt.SSju44rPXoVNPtO';
@@ -63,6 +65,7 @@ export default function Dashboard() {
   const [rearrangeMode, setRearrangeMode] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [viewingRecord, setViewingRecord] = useState(null);
+  const [downloadDropdown, setDownloadDropdown] = useState(false);
 
   // Admin Modal Auth State
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -324,6 +327,27 @@ export default function Dashboard() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const exportRowToPDF = (row) => {
+    const doc = new jsPDF();
+    doc.text(`Publication Details (ID: ${row.id || 'N/A'})`, 14, 15);
+    
+    const tableData = columns.map(col => [col.label, (row[col.key] || '').toString()]);
+    
+    doc.autoTable({
+      startY: 20,
+      head: [['Field', 'Value']],
+      body: tableData,
+      theme: 'grid',
+      styles: { cellWidth: 'wrap' },
+      columnStyles: {
+        0: { cellWidth: 50, fontStyle: 'bold' },
+        1: { cellWidth: 'auto' }
+      }
+    });
+
+    doc.save(`publication_${row.id || 'export'}.pdf`);
   };
 
   if (initialLoading) {
@@ -613,11 +637,19 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
-            <div className="modal-footer">
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', alignItems: 'center', width: '100%' }}>
               <button type="button" className="btn-cancel" onClick={() => setViewingRecord(null)}>Close</button>
-              <button type="button" className="btn-add" style={{ background: '#10B981' }} onClick={() => exportRowToCSV(viewingRecord)}>
-                <Download size={16} /> Export to CSV
-              </button>
+              <div style={{ position: 'relative' }}>
+                <button type="button" className="btn-add" style={{ background: '#10B981', display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={() => setDownloadDropdown(!downloadDropdown)}>
+                  <Download size={16} /> Export Data <ChevronDown size={16} />
+                </button>
+                {downloadDropdown && (
+                  <div style={{ position: 'absolute', bottom: '100%', right: 0, marginBottom: '0.5rem', background: 'white', border: '1px solid var(--border-color)', borderRadius: '6px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', overflow: 'hidden', zIndex: 10, minWidth: '150px' }}>
+                    <button style={{ width: '100%', padding: '0.75rem 1rem', background: 'white', color: 'var(--text-main)', border: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', fontSize: '0.9rem', outline: 'none' }} onMouseEnter={(e) => { e.currentTarget.style.background = '#f3f4f6' }} onMouseLeave={(e) => { e.currentTarget.style.background = 'white' }} onClick={() => { exportRowToCSV(viewingRecord); setDownloadDropdown(false); }}>Download as CSV</button>
+                    <button style={{ width: '100%', padding: '0.75rem 1rem', background: 'white', color: 'var(--text-main)', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '0.9rem', outline: 'none' }} onMouseEnter={(e) => { e.currentTarget.style.background = '#f3f4f6' }} onMouseLeave={(e) => { e.currentTarget.style.background = 'white' }} onClick={() => { exportRowToPDF(viewingRecord); setDownloadDropdown(false); }}>Download as PDF</button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
