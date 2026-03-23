@@ -57,6 +57,9 @@ export default function Dashboard() {
   const [columns, setColumns] = useState([]);
   const [newColumnModal, setNewColumnModal] = useState(false);
   const [newColumnLabel, setNewColumnLabel] = useState('');
+  const [renameColumnModal, setRenameColumnModal] = useState(false);
+  const [renameColumnKey, setRenameColumnKey] = useState('');
+  const [renameColumnLabel, setRenameColumnLabel] = useState('');
   const [rearrangeMode, setRearrangeMode] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
@@ -235,6 +238,44 @@ export default function Dashboard() {
         </div>
       </div>
     ), { duration: 5000, id: `del-col-${colKey}` });
+  };
+
+  const openRenameModal = (col) => {
+    setRenameColumnKey(col.key);
+    setRenameColumnLabel(col.label);
+    setRenameColumnModal(true);
+  };
+
+  const submitRenameColumn = async () => {
+    if (!renameColumnLabel.trim()) return;
+    try {
+      const headers = { Authorization: 'Bearer admin-token' };
+      const res = await axios.post(`${API_URL}?action=rename_column`, { 
+        old_key: renameColumnKey, 
+        new_label: renameColumnLabel 
+      }, { headers });
+      
+      if (res.data.status === 'success') {
+        const { old_key, new_key } = res.data.column;
+        const storedOrder = localStorage.getItem('columnOrder');
+        if (storedOrder) {
+          try {
+            let parsedOrderKeys = JSON.parse(storedOrder);
+            parsedOrderKeys = parsedOrderKeys.map(k => k === old_key ? new_key : k);
+            localStorage.setItem('columnOrder', JSON.stringify(parsedOrderKeys));
+          } catch (e) { }
+        }
+        
+        setRenameColumnModal(false);
+        toast.success("Column renamed successfully!");
+        await fetchColumns();
+        fetchRecords(); 
+      } else {
+        toast.error(res.data.message);
+      }
+    } catch (e) {
+      toast.error("Failed to rename column.");
+    }
   };
 
   const onDragEnd = (result) => {
@@ -511,6 +552,33 @@ export default function Dashboard() {
         </div>
       )}
 
+      {renameColumnModal && (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h2><Edit2 size={20} /> Rename Column</h2>
+              <button className="close-btn" onClick={() => setRenameColumnModal(false)}><X size={20} /></button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label>New Column Name (Label)</label>
+                <input
+                  type="text"
+                  value={renameColumnLabel}
+                  onChange={e => setRenameColumnLabel(e.target.value)}
+                  placeholder="e.g. Total Citations"
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn-cancel" onClick={() => setRenameColumnModal(false)}>Cancel</button>
+              <button type="button" className="btn-add" onClick={submitRenameColumn}>Rename Column</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {loginModalOpen && (
         <div className="modal-overlay">
           <div className="modal" style={{ maxWidth: '400px' }}>
@@ -609,13 +677,23 @@ export default function Dashboard() {
                                 <GripVertical size={18} />
                               </div>
                               <span className="col-label">{col.label}</span>
-                              <button
-                                onClick={() => requestDeleteColumn(col.key)}
-                                className="delete-col-btn"
-                                title="Delete Column"
-                              >
-                                <Trash2 size={14} />
-                              </button>
+                              <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                                <button
+                                  onClick={() => openRenameModal(col)}
+                                  className="edit-col-btn"
+                                  title="Rename Column"
+                                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)' }}
+                                >
+                                  <Edit2 size={16} />
+                                </button>
+                                <button
+                                  onClick={() => requestDeleteColumn(col.key)}
+                                  className="delete-col-btn"
+                                  title="Delete Column"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
                             </div>
                           )}
                         </Draggable>

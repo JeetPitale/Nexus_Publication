@@ -78,6 +78,34 @@ if ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'add_col
     exit;
 }
 
+if ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'rename_column') {
+    $oldKey = trim($input['old_key'] ?? '');
+    $newLabel = trim($input['new_label'] ?? '');
+    
+    if (empty($oldKey) || empty($newLabel)) {
+        echo json_encode(["status" => "error", "message" => "Old key and new label required."]);
+        exit;
+    }
+
+    $newKey = strtolower(preg_replace('/[^a-zA-Z0-9_]/', '_', $newLabel));
+    $newKey = trim($newKey, '_');
+
+    if ($newKey !== $oldKey && in_array($newKey, $fields)) {
+        echo json_encode(["status" => "error", "message" => "Column with this name already exists."]);
+        exit;
+    }
+
+    try {
+        if ($newKey !== $oldKey) {
+            $pdo->exec("ALTER TABLE publications CHANGE COLUMN `$oldKey` `$newKey` TEXT");
+        }
+        echo json_encode(["status" => "success", "message" => "Column renamed successfully.", "column" => ["old_key" => $oldKey, "new_key" => $newKey, "label" => $newLabel]]);
+    } catch (PDOException $e) {
+        echo json_encode(["status" => "error", "message" => "Failed to rename column: " . $e->getMessage()]);
+    }
+    exit;
+}
+
 if ($method === 'DELETE' && isset($_GET['action']) && $_GET['action'] === 'delete_column') {
     // Check querystring for colKey if not in JSON body
     $colKey = isset($input['colKey']) ? $input['colKey'] : (isset($_GET['colKey']) ? $_GET['colKey'] : null);
