@@ -45,7 +45,7 @@ const INITIAL_COLUMNS_MAP = {
   'utd_ranking': 'UTD Ranking'
 };
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export default function Dashboard() {
   const [data, setData] = useState([]);
