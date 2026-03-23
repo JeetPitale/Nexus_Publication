@@ -639,7 +639,7 @@ export default function Dashboard() {
             </div>
             <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', alignItems: 'center', width: '100%' }}>
               <button type="button" className="btn-cancel" onClick={() => setViewingRecord(null)}>Close</button>
-              {isLoggedIn ? (
+              {isAdmin ? (
                 <div style={{ position: 'relative' }}>
                   <button type="button" className="btn-add" style={{ background: '#10B981', display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={() => setDownloadDropdown(!downloadDropdown)}>
                     <Download size={16} /> Export Data <ChevronDown size={16} />
