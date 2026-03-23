@@ -10,8 +10,8 @@ import FilterComponent from './FilterComponent';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import bcrypt from 'bcryptjs';
 import toast, { Toaster } from 'react-hot-toast';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 
 const ADMIN_HASH = '$2b$10$xiXaAZst3FE.kbbEiWGd2.yWLiLsUpwua6jAt.SSju44rPXoVNPtO';
@@ -331,11 +331,12 @@ export default function Dashboard() {
 
   const exportRowToPDF = (row) => {
     const doc = new jsPDF();
-    doc.text(`Publication Details (ID: ${row.id || 'N/A'})`, 14, 15);
+    const displayId = row.serial_number || row._id || 'N/A';
+    doc.text(`Publication Details (ID: ${displayId})`, 14, 15);
     
     const tableData = columns.map(col => [col.label, (row[col.key] || '').toString()]);
     
-    doc.autoTable({
+    autoTable(doc, {
       startY: 20,
       head: [['Field', 'Value']],
       body: tableData,
@@ -347,7 +348,7 @@ export default function Dashboard() {
       }
     });
 
-    doc.save(`publication_${row.id || 'export'}.pdf`);
+    doc.save(`publication_${displayId}.pdf`);
   };
 
   if (initialLoading) {
