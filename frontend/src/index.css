@@ -803,6 +803,22 @@ tbody tr:hover .actions-cell {
     max-height: calc(100vh - 200px);
   }
 
+  /* Disable sticky actions on small screens since it overlaps other columns */
+  .sticky-actions,
+  .actions-cell {
+    position: static;
+    border-left: none;
+    min-width: auto !important;
+  }
+
+  .sticky-actions {
+    text-align: left !important;
+  }
+
+  .actions-cell {
+    justify-content: flex-start;
+  }
+
   th,
   td {
     padding: 0.5rem 0.75rem;
