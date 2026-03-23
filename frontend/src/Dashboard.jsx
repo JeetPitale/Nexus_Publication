@@ -639,17 +639,23 @@ export default function Dashboard() {
             </div>
             <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', alignItems: 'center', width: '100%' }}>
               <button type="button" className="btn-cancel" onClick={() => setViewingRecord(null)}>Close</button>
-              <div style={{ position: 'relative' }}>
-                <button type="button" className="btn-add" style={{ background: '#10B981', display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={() => setDownloadDropdown(!downloadDropdown)}>
-                  <Download size={16} /> Export Data <ChevronDown size={16} />
+              {isLoggedIn ? (
+                <div style={{ position: 'relative' }}>
+                  <button type="button" className="btn-add" style={{ background: '#10B981', display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={() => setDownloadDropdown(!downloadDropdown)}>
+                    <Download size={16} /> Export Data <ChevronDown size={16} />
+                  </button>
+                  {downloadDropdown && (
+                    <div style={{ position: 'absolute', bottom: '100%', right: 0, marginBottom: '0.5rem', background: 'white', border: '1px solid var(--border-color)', borderRadius: '6px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', overflow: 'hidden', zIndex: 10, minWidth: '150px' }}>
+                      <button style={{ width: '100%', padding: '0.75rem 1rem', background: 'white', color: 'var(--text-main)', border: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', fontSize: '0.9rem', outline: 'none' }} onMouseEnter={(e) => { e.currentTarget.style.background = '#f3f4f6' }} onMouseLeave={(e) => { e.currentTarget.style.background = 'white' }} onClick={() => { exportRowToCSV(viewingRecord); setDownloadDropdown(false); }}>Download as CSV</button>
+                      <button style={{ width: '100%', padding: '0.75rem 1rem', background: 'white', color: 'var(--text-main)', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '0.9rem', outline: 'none' }} onMouseEnter={(e) => { e.currentTarget.style.background = '#f3f4f6' }} onMouseLeave={(e) => { e.currentTarget.style.background = 'white' }} onClick={() => { exportRowToPDF(viewingRecord); setDownloadDropdown(false); }}>Download as PDF</button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button type="button" className="btn-add" style={{ background: '#10B981', display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={() => exportRowToPDF(viewingRecord)}>
+                  <Download size={16} /> Download PDF
                 </button>
-                {downloadDropdown && (
-                  <div style={{ position: 'absolute', bottom: '100%', right: 0, marginBottom: '0.5rem', background: 'white', border: '1px solid var(--border-color)', borderRadius: '6px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', overflow: 'hidden', zIndex: 10, minWidth: '150px' }}>
-                    <button style={{ width: '100%', padding: '0.75rem 1rem', background: 'white', color: 'var(--text-main)', border: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', fontSize: '0.9rem', outline: 'none' }} onMouseEnter={(e) => { e.currentTarget.style.background = '#f3f4f6' }} onMouseLeave={(e) => { e.currentTarget.style.background = 'white' }} onClick={() => { exportRowToCSV(viewingRecord); setDownloadDropdown(false); }}>Download as CSV</button>
-                    <button style={{ width: '100%', padding: '0.75rem 1rem', background: 'white', color: 'var(--text-main)', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '0.9rem', outline: 'none' }} onMouseEnter={(e) => { e.currentTarget.style.background = '#f3f4f6' }} onMouseLeave={(e) => { e.currentTarget.style.background = 'white' }} onClick={() => { exportRowToPDF(viewingRecord); setDownloadDropdown(false); }}>Download as PDF</button>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </div>
