@@ -62,6 +62,7 @@ export default function Dashboard() {
   const [renameColumnLabel, setRenameColumnLabel] = useState('');
   const [rearrangeMode, setRearrangeMode] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [viewingRecord, setViewingRecord] = useState(null);
 
   // Admin Modal Auth State
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -431,12 +432,22 @@ export default function Dashboard() {
                       const isCitation = col.key.toLowerCase().includes('citation');
                       const isLong = col.key.toLowerCase().includes('title') || col.key.toLowerCase().includes('source');
                       const isNo = col.key.toLowerCase().includes('no');
+                      const isTitle = col.key === 'title_without_author';
+                      
                       return (
                         <td 
                           key={col.key}
                           style={{ 
                             minWidth: isCitation ? '550px' : isLong ? '400px' : isNo ? '60px' : '180px',
-                            maxWidth: isCitation ? '550px' : 'none'
+                            maxWidth: isCitation ? '550px' : 'none',
+                            cursor: isTitle ? 'pointer' : 'default',
+                            color: isTitle ? 'var(--primary)' : 'inherit',
+                            textDecoration: isTitle ? 'underline' : 'none'
+                          }}
+                          onClick={() => {
+                            if (isTitle) {
+                              setViewingRecord(row);
+                            }
                           }}
                         >
                           {row[col.key]}
@@ -574,6 +585,39 @@ export default function Dashboard() {
             <div className="modal-footer">
               <button type="button" className="btn-cancel" onClick={() => setRenameColumnModal(false)}>Cancel</button>
               <button type="button" className="btn-add" onClick={submitRenameColumn}>Rename Column</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {viewingRecord && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h2>Publication Details</h2>
+              <button className="close-btn" onClick={() => setViewingRecord(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="details-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                {columns.map(col => (
+                  <div key={col.key} className="detail-item">
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+                      {col.label}
+                    </div>
+                    <div style={{ fontSize: '0.95rem', color: 'var(--text-main)', marginTop: '0.25rem', wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}>
+                      {viewingRecord[col.key] || '-'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn-cancel" onClick={() => setViewingRecord(null)}>Close</button>
+              <button type="button" className="btn-add" style={{ background: '#10B981' }} onClick={() => exportRowToCSV(viewingRecord)}>
+                <Download size={16} /> Export to CSV
+              </button>
             </div>
           </div>
         </div>
