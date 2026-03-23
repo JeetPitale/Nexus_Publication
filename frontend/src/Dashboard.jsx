@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
   Building2, Search, Plus, Filter,
   X, LogIn, LogOut, Edit2, Trash2,
-  Database, AlertCircle, Download, GripVertical, ChevronDown
+  Database, AlertCircle, Download, GripVertical, ChevronDown, Info
 } from 'lucide-react';
 import FilterComponent from './FilterComponent';
 
@@ -795,6 +795,35 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+      {/* Quick Guide Tab */}
+      <div className="guide-tab-wrapper">
+        <div className="guide-tab-icon" title="Quick Guide">
+          <Info size={24} />
+        </div>
+        <div className="guide-content">
+          <h3><Info size={18} /> Quick Guide</h3>
+          <ul>
+            <li>
+              <div className="guide-step-num">1</div>
+              <span>Click on a <b>title</b> to view the full details of any publication.</span>
+            </li>
+            <li>
+              <div className="guide-step-num">2</div>
+              <span>Use the <b>Search bar</b> or <b>Filters</b> to discover specific records or refine your view.</span>
+            </li>
+            <li>
+              <div className="guide-step-num">3</div>
+              <span>From the publication details window, you can instantly <b>Download as PDF</b>.</span>
+            </li>
+            {isAdmin ? null : (
+              <li>
+                <div className="guide-step-num">4</div>
+                <span>Admins can <b>Log In</b> to manage, add, edit, or delete publications.</span>
+              </li>
+            )}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }
