@@ -288,7 +288,9 @@ header p {
 
 .table-scroll {
   overflow-x: auto;
-  min-height: 150px;
+  overflow-y: auto;
+  max-height: calc(100vh - 320px);
+  min-height: 300px;
 }
 
 table {
