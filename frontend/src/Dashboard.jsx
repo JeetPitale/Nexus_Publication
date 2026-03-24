@@ -12,7 +12,7 @@ import bcrypt from 'bcryptjs';
 import toast, { Toaster } from 'react-hot-toast';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-
+import Joyride, { STATUS } from 'react-joyride';
 
 const ADMIN_HASH = '$2b$10$xiXaAZst3FE.kbbEiWGd2.yWLiLsUpwua6jAt.SSju44rPXoVNPtO';
 
@@ -66,6 +66,35 @@ export default function Dashboard() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [viewingRecord, setViewingRecord] = useState(null);
   const [downloadDropdown, setDownloadDropdown] = useState(false);
+  const [runTour, setRunTour] = useState(false);
+
+  const tourSteps = [
+    {
+      target: '.tour-title-cell',
+      content: 'Click on a title to view the full details of any publication.',
+      disableBeacon: true,
+    },
+    {
+      target: '.filters-panel',
+      content: 'Use the Search bar or Filters to discover specific records or refine your view.',
+    },
+    {
+      target: '.tour-export-row',
+      content: 'From the actions menu, you can instantly Export as CSV or view details to Download as PDF.',
+    },
+    {
+      target: '.tour-admin-login',
+      content: 'Admins can Log In to manage, add, edit, or delete publications.',
+    }
+  ];
+
+  const handleJoyrideCallback = (data) => {
+    const { status } = data;
+    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+    if (finishedStatuses.includes(status)) {
+      setRunTour(false);
+    }
+  };
 
   // Admin Modal Auth State
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -384,7 +413,7 @@ export default function Dashboard() {
             <p>Manage and discover comprehensive publication metrics.</p>
           </div>
         </div>
-        <div className="auth-controls">
+        <div className="auth-controls tour-admin-login">
           {isAdmin ? (
             <button className="logout-btn" onClick={logoutAdmin}>
               <LogOut size={16} /> Exit Admin Mode
@@ -464,6 +493,7 @@ export default function Dashboard() {
                       return (
                         <td 
                           key={col.key}
+                          className={isTitle ? "tour-title-cell" : ""}
                           style={{ 
                             minWidth: isCitation ? '550px' : isLong ? '400px' : isNo ? '60px' : '180px',
                             maxWidth: isCitation ? '550px' : 'none',
@@ -482,7 +512,7 @@ export default function Dashboard() {
                       );
                     })}
                     <td className="actions-cell">
-                      <button className="btn-icon-grid" onClick={() => exportRowToCSV(row)} title="Export Row">
+                      <button className="btn-icon-grid tour-export-row" onClick={() => exportRowToCSV(row)} title="Export Row">
                         <Download size={16} />
                       </button>
                       {isAdmin && (
@@ -799,33 +829,30 @@ export default function Dashboard() {
       )}
       {/* Quick Guide Tab */}
       <div className="guide-tab-wrapper">
-        <div className="guide-tab-icon" title="Quick Guide">
+        <div className="guide-tab-icon" title="Play Quick Guide" onClick={() => setRunTour(true)} style={{ cursor: 'pointer' }}>
           <Info size={24} />
         </div>
-        <div className="guide-content">
-          <h3><Info size={18} /> Quick Guide</h3>
-          <ul>
-            <li>
-              <div className="guide-step-num">1</div>
-              <span>Click on a <b>title</b> to view the full details of any publication.</span>
-            </li>
-            <li>
-              <div className="guide-step-num">2</div>
-              <span>Use the <b>Search bar</b> or <b>Filters</b> to discover specific records or refine your view.</span>
-            </li>
-            <li>
-              <div className="guide-step-num">3</div>
-              <span>From the publication details window, you can instantly <b>Download as PDF</b>.</span>
-            </li>
-            {isAdmin ? null : (
-              <li>
-                <div className="guide-step-num">4</div>
-                <span>Admins can <b>Log In</b> to manage, add, edit, or delete publications.</span>
-              </li>
-            )}
-          </ul>
-        </div>
       </div>
+      
+      <Joyride
+        callback={handleJoyrideCallback}
+        continuous={true}
+        run={runTour}
+        scrollToFirstStep={true}
+        showProgress={true}
+        showSkipButton={true}
+        steps={tourSteps}
+        styles={{
+          options: {
+            zIndex: 10000,
+            primaryColor: '#4F46E5',
+          }
+        }}
+        locale={{
+          last: 'Finish',
+          skip: 'Skip'
+        }}
+      />
     </div>
   );
 }
