@@ -49,6 +49,44 @@ const INITIAL_COLUMNS_MAP = {
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
+const CustomTooltip = ({
+  index,
+  step,
+  backProps,
+  closeProps,
+  primaryProps,
+  tooltipProps,
+  isLastStep,
+  size
+}) => (
+  <div {...tooltipProps} style={{ background: '#fff', borderRadius: '12px', padding: '24px', width: '320px', boxShadow: '0px 10px 30px rgba(0, 0, 0, 0.1)', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+      <span style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        STEP {index + 1} OF {size}
+      </span>
+      {step.showSkipButton && (
+        <button {...closeProps} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: '13px' }}>
+          Skip
+        </button>
+      )}
+    </div>
+    <div style={{ marginBottom: '24px' }}>
+      {step.title && <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', color: '#111827', fontWeight: 700 }}>{step.title}</h3>}
+      <div style={{ fontSize: '14px', color: '#4b5563', lineHeight: '1.5' }}>{step.content}</div>
+    </div>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {index > 0 ? (
+        <button {...backProps} style={{ padding: '8px 20px', background: 'transparent', border: '1px solid #f97316', borderRadius: '8px', color: '#f97316', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>
+          Back
+        </button>
+      ) : <div />}
+      <button {...primaryProps} style={{ padding: '10px 24px', background: '#f97316', border: 'none', borderRadius: '8px', color: '#fff', cursor: 'pointer', fontWeight: 600, fontSize: '14px', boxShadow: '0 4px 6px rgba(249, 115, 22, 0.25)' }}>
+        {isLastStep ? 'Finish' : 'Next'}
+      </button>
+    </div>
+  </div>
+);
+
 export default function Dashboard() {
   const [data, setData] = useState([]);
   const [isAdmin, setIsAdmin] = useState(() => {
@@ -73,20 +111,28 @@ export default function Dashboard() {
   const tourSteps = [
     {
       target: '.tour-title-cell',
+      title: 'View Details',
       content: 'Click on a title to view the full details of any publication.',
       disableBeacon: true,
+      showSkipButton: true
     },
     {
       target: '.filters-panel',
+      title: 'Search & Filter',
       content: 'Use the Search bar or Filters to discover specific records or refine your view.',
+      showSkipButton: true
     },
     {
       target: '.tour-export-row',
+      title: 'Export Actions',
       content: 'From the actions menu, you can instantly Export as CSV or view details to Download as PDF.',
+      showSkipButton: true
     },
     {
       target: '.tour-admin-login',
+      title: 'Admin Controls',
       content: 'Admins can Log In to manage, add, edit, or delete publications.',
+      showSkipButton: true
     }
   ];
 
@@ -846,18 +892,18 @@ export default function Dashboard() {
         continuous={true}
         run={runTour}
         scrollToFirstStep={true}
-        showProgress={true}
-        showSkipButton={true}
+        showProgress={false}
+        showSkipButton={false} 
         steps={tourSteps}
+        tooltipComponent={CustomTooltip}
         styles={{
           options: {
             zIndex: 10000,
-            primaryColor: '#4F46E5',
+          },
+          spotlight: {
+            borderRadius: '8px',
+            boxShadow: '0 0 0 4px #f97316'
           }
-        }}
-        locale={{
-          last: 'Finish',
-          skip: 'Skip'
         }}
       />
     </div>
