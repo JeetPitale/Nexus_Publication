@@ -51,7 +51,9 @@ const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export default function Dashboard() {
   const [data, setData] = useState([]);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(() => {
+    return document.cookie.includes('adminAuth=true');
+  });
   const [filters, setFilters] = useState({});
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({});
@@ -171,7 +173,10 @@ export default function Dashboard() {
   const loginAdmin = () => {
     setLoginModalOpen(true);
   };
-  const logoutAdmin = () => setIsAdmin(false);
+  const logoutAdmin = () => {
+    document.cookie = "adminAuth=; max-age=0; path=/";
+    setIsAdmin(false);
+  };
 
   const openForm = (record = null) => {
     if (record) {
@@ -713,6 +718,7 @@ export default function Dashboard() {
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
                       if (bcrypt.compareSync(adminPasswordInput, ADMIN_HASH)) {
+                        document.cookie = "adminAuth=true; max-age=43200; path=/"; // 12 hours
                         setIsAdmin(true);
                         setLoginModalOpen(false);
                         setAdminPasswordInput('');
@@ -730,6 +736,7 @@ export default function Dashboard() {
               <button type="button" className="btn-cancel" onClick={() => { setLoginModalOpen(false); setLoginError(''); setAdminPasswordInput(''); }}>Cancel</button>
               <button type="button" className="btn-add" onClick={() => {
                 if (bcrypt.compareSync(adminPasswordInput, ADMIN_HASH)) {
+                  document.cookie = "adminAuth=true; max-age=43200; path=/"; // 12 hours
                   setIsAdmin(true);
                   setLoginModalOpen(false);
                   setAdminPasswordInput('');
