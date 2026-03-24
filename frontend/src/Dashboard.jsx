@@ -105,6 +105,7 @@ export default function Dashboard() {
       }
     } catch (err) {
       console.error("Failed to fetch columns:", err);
+      toast.error("Failed to load columns: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -127,6 +128,7 @@ export default function Dashboard() {
       }
     } catch (err) {
       console.error("Failed to fetch records:", err);
+      toast.error("Failed to load records: " + (err.response?.data?.message || err.message));
     }
   };
 
